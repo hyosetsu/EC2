@@ -63,8 +63,14 @@ $select_sth = $dbh->prepare('SELECT * FROM bbs_entries ORDER BY created_at DESC'
 $select_sth->execute();
 ?>
 
-<title>画像投稿掲示板</title>
-
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>画像投稿掲示板</title>
+  <link rel="stylesheet" href="./css/bbs.css">
+</head>
 <!-- フォームのPOST先はこのファイル自身にする -->
 <form method="POST" action="./bbsimagetest.php" enctype="multipart/form-data">
   <textarea name="body" required></textarea>
