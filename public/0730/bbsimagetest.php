@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['body'])) {
 }
 
 // いままで保存してきたものを取得
-$select_sth = $dbh->prepare('SELECT * FROM bbs_entries ORDER BY created_at DESC');
+$select_sth = $dbh->prepare('SELECT * FROM bbs_entries ORDER BY created_at ASC');
 $select_sth->execute();
 ?>
 
@@ -67,57 +67,90 @@ $select_sth->execute();
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>画像投稿掲示板</title>
-  <link rel="stylesheet" href="./css/bbs.css">
+  <link rel="stylesheet" href="../css/bbs.css">
 </head>
-<!-- フォームのPOST先はこのファイル自身にする -->
-<form method="POST" action="./bbsimagetest.php" enctype="multipart/form-data">
-  <textarea name="body" required></textarea>
-  <div style="margin: 1em 0;">
-    <input type="file" accept="image/*" name="image">
-  </div>
-  <button type="submit">送信</button>
-</form>
+<body>
+  <!-- フォームのPOST先はこのファイル自身にする -->
+  <form method="POST" action="./bbsimagetest.php" enctype="multipart/form-data" id="postForm">
+    <textarea name="body" required placeholder="本文を入力してください"></textarea>
+    <div style="margin: 1em 0;">
+      <input type="file" accept="image/*" name="image" id="imageInput">
+    </div>
+    <button type="submit">送信</button>
+  </form>
 
-<script>
-  document.getElementById('imageInput').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      alert('5MBを超えるファイルはアップロードできません。');
-      e.target.value = ''; // ファイル選択を解除
-    }
-  });
-</script>
-
-<!-- エラーメッセージ -->
-<?php if (isset($_GET['error'])): ?>
-  <?php if ($_GET['error'] === 'invalid_filetype'): ?>
-    <p style="color:red;">アップロードできるのは画像ファイル（JPEG, PNG, GIF, WebP）のみです。</p>
-  <?php elseif ($_GET['error'] === 'too_large'): ?>
-    <p style="color:red;">5MBを超える画像ファイルはアップロードできません。</p>
+  <!-- エラーメッセージ -->
+  <?php if (isset($_GET['error']) && $_GET['error'] === 'invalid_filetype'): ?>
+    <p class="error">アップロードできるのは画像ファイル（JPEG, PNG, GIF, WebP）のみです。</p>
+    <?php elseif (isset($_GET['error']) && $_GET['error'] === 'too_large'): ?>
+      <p class="error">5MBを超える画像ファイルはアップロードできません。</p>
   <?php endif ?>
-<?php endif ?>
 
-<hr>
+  <hr>
 
-<?php foreach($select_sth as $entry): ?>
-  <dl style="margin-bottom: 1em; padding-bottom: 1em; border-bottom: 1px solid #ccc;">
-    <dt>ID</dt>
-    <dd><?= htmlspecialchars($entry['id']) ?></dd>
-    <dt>日時</dt>
-    <dd><?= htmlspecialchars($entry['created_at']) ?></dd>
-    <dt>内容</dt>
-    <dd>
-      <?= nl2br(htmlspecialchars($entry['body'])) // 必ず htmlspecialchars() すること ?>
-      <?php if(!empty($entry['image_filename'])): // 画像がある場合は img 要素を使って表示 ?>
-      <div>
-        <img src="/image/<?= htmlspecialchars($entry['image_filename']) ?>" style="max-height: 10em;">
+  <!-- 表示部分 -->
+  <?php foreach($select_sth as $entry): ?>
+    <div class="entry" id="entry-<?= htmlspecialchars($entry['id']) ?>">
+      <div class="meta">
+        <span class="id">#<?= htmlspecialchars($entry['id']) ?></span>
+        <span class="date"><?= htmlspecialchars($entry['created_at']) ?></span>
       </div>
+      <div class="body">
+        <?= nl2br(preg_replace('/&gt;&gt;(\d+)/', '<a href="#entry-$1">&gt;&gt;$1</a>', htmlspecialchars($entry['body']))) ?>
+      </div>
+      <?php if (!empty($entry['image_filename'])): ?>
+        <div class="image">
+          <img src="../image/<?= htmlspecialchars($entry['image_filename']) ?>" alt="投稿画像">
+        </div>
       <?php endif; ?>
-    </dd>
-  </dl>
-<?php endforeach ?>
+    </div>
+  <?php endforeach ?>
+
+  <script>
+  // --- 画像を自動縮小して送信 ---
+  document.getElementById('postForm').addEventListener('submit', async function(e) {
+    const fileInput = document.getElementById('imageInput');
+    if (fileInput.files.length === 0) return; // 画像なし
+
+    const file = fileInput.files[0];
+    if (!file.type.startsWith('../image/')) return;
+
+    const img = await createImageBitmap(file);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // 縮小比率 (最大幅・高さを1000px)
+    const maxSize = 1000;
+    let { width, height } = img;
+    if (width > maxSize || height > maxSize) {
+      if (width > height) {
+        height = Math.round(height * maxSize / width);
+        width = maxSize;
+      } else {
+        width = Math.round(width * maxSize / height);
+        height = maxSize;
+      }
+    }
+
+    canvas.width = width;
+    canvas.height = height;
+    ctx.drawImage(img, 0, 0, width, height);
+
+    // Blobに変換（JPEG品質0.85）
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+    const newFile = new File([blob], file.name, { type: 'image/jpeg' });
+
+    // FormDataを作り直す
+    const formData = new FormData(this);
+    formData.set('image', newFile);
+
+    e.preventDefault();
+    fetch(this.action, {
+      method: this.method,
+      body: formData
+    }).then(() => location.reload());
+  });
+  </script>
+</body>
+</html>

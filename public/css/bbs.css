@@ -1,0 +1,61 @@
+body {
+  font-family: sans-serif;
+  margin: 1em;
+  background: #f9f9f9;
+  color: #333;
+}
+
+form textarea {
+  width: 100%;
+  height: 5em;
+  padding: 0.5em;
+  font-size: 1em;
+}
+
+button {
+  padding: 0.5em 1em;
+  border: none;
+  background: #007acc;
+  color: white;
+  border-radius: 5px;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}
+
+.entry {
+  background: white;
+  margin-bottom: 1em;
+  padding: 0.8em;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.meta {
+  font-size: 0.85em;
+  color: #666;
+  margin-bottom: 0.5em;
+}
+
+.body {
+  margin-bottom: 0.5em;
+  word-wrap: break-word;
+}
+
+.image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+/* スマホ向け調整 */
+@media (max-width: 600px) {
+  form textarea {
+    height: 4em;
+  }
+  .entry {
+    font-size: 0.9em;
+  }
+}
