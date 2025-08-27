@@ -38,9 +38,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['body'])) {
     ];
     $extension = $extension_map[$mime_type];
 
+    // 保存ディレクトリ
+    $upload_dir = '/var/www/upload/';
+
     // ファイル名生成（時間 + ランダム）
     $image_filename = time() . '_' . bin2hex(random_bytes(10)) . '.' . $extension;
-    $filepath = '/var/www/upload/image/' . $image_filename;
+    $filepath = $upload_dir . $image_filename;
 
     move_uploaded_file($tmp_path, $filepath);
   }
@@ -101,7 +104,7 @@ $select_sth->execute();
       </div>
       <?php if (!empty($entry['image_filename'])): ?>
         <div class="image">
-          <img src="../image/<?= htmlspecialchars($entry['image_filename']) ?>" alt="投稿画像">
+          <img src="/image/<?= htmlspecialchars($entry['image_filename']) ?>" alt="投稿画像">
         </div>
       <?php endif; ?>
     </div>
@@ -114,7 +117,7 @@ $select_sth->execute();
     if (fileInput.files.length === 0) return; // 画像なし
 
     const file = fileInput.files[0];
-    if (!file.type.startsWith('../image/')) return;
+    if (!file.type.startsWith('image/')) return;
 
     const img = await createImageBitmap(file);
     const canvas = document.createElement('canvas');
