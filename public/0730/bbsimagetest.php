@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['body'])) {
     $extension = $extension_map[$mime_type];
 
     $image_filename = time() . '_' . bin2hex(random_bytes(10)) . '.' . $extension;
-    $filepath = '/var/www/upload/image/' . $image_filename;
+    $filepath = '/var/www/upload/' . $image_filename;
 
     move_uploaded_file($tmp_path, $filepath);
   }
@@ -148,8 +148,11 @@ $select_sth->execute();
         <dt>内容</dt>
         <dd>
           <?php
-            $body = htmlspecialchars($entry['body']);
-            $body = preg_replace('/&gt;&gt;(\d+)/', '<a href="#post-$1">&gt;&gt;$1</a>', $body);
+            $body = htmlspecialchars($entry['body'], ENT_QUOTES, 'UTF-8');
+            $body = preg_replace_callback('/&gt;&gt;(\d+)/', function($m) {
+              $num = $m[1];
+              return '<a href="#post-' . $num . '">&gt;&gt;' . $num . '</a>';
+            }, $body);
             echo nl2br($body);
           ?>
           <?php if (!empty($entry['image_filename'])): ?>
@@ -158,7 +161,6 @@ $select_sth->execute();
             </div>
           <?php endif; ?>
         </dd>
-      </dl>
     </div>
   <?php endforeach ?>
 </body>
