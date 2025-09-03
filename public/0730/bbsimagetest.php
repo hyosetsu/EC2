@@ -48,19 +48,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['body'])) {
   exit;
 }
 
-// ===== ページング機能追加部分 =====
-$perPage = 10; // 1ページに表示する件数
-$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
-if ($page < 1) $page = 1;
-$offset = ($page - 1) * $perPage;
-
-// 総件数を取得
-$total = (int)$dbh->query("SELECT COUNT(*) FROM bbs_entries")->fetchColumn();
-$totalPages = ceil($total / $perPage);
-
-// 投稿を取得
-$select_sth = $dbh->prepare('SELECT * FROM bbs_entries ORDER BY created_at DESC LIMIT :limit OFFSET :offset');
-$select_sth->bindValue(':limit', $perPage, PDO::PARAM_INT);
 $select_sth->bindValue(':offset', $offset, PDO::PARAM_INT);
 $select_sth->execute();
 ?>
@@ -177,23 +164,5 @@ $select_sth->execute();
     </div>
   <?php endforeach ?>
 
-  <!-- ページリンク -->
-  <div class="pagination">
-    <?php if ($page > 1): ?>
-      <a href="?page=<?= $page - 1 ?>">&laquo; 前へ</a>
-    <?php endif; ?>
-
-    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-      <?php if ($i === $page): ?>
-        <strong><?= $i ?></strong>
-      <?php else: ?>
-        <a href="?page=<?= $i ?>"><?= $i ?></a>
-      <?php endif; ?>
-    <?php endfor; ?>
-
-    <?php if ($page < $totalPages): ?>
-      <a href="?page=<?= $page + 1 ?>">次へ &raquo;</a>
-    <?php endif; ?>
-  </div>
 </body>
 </html>
