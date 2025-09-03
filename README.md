@@ -41,5 +41,10 @@ docker compose version
 
 ## 準備はできたので構築していく
 ### まずは設定ファイルから
-- compose.ymlはhttps://github.com/hyosetsu/EC2/blob/main/compose.yml
+- compose.ymlはhttps://github.com/hyosetsu/EC2/blob/main/compose.ymlから
+- Dockerfileはhttps://github.com/hyosetsu/EC2/blob/main/Dockerfileから
+- nginx/conf.d/default.confはhttps://github.com/hyosetsu/EC2/blob/main/nginx/conf.d/default.confから
+  作成
+
+
 
