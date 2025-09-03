@@ -31,6 +31,7 @@ sudo usermod -a -G docker ec2-user
 ```
 
 dockerをインストールしdockerグループに追加
+
 usermodを反映するために一度ログアウトする
 
 - Docker Composeのインストール
