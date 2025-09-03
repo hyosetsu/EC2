@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['body'])) {
   exit;
 }
 
-$select_sth->bindValue(':offset', $offset, PDO::PARAM_INT);
+$select_sth = $dbh->prepare('SELECT * FROM bbs_entries ORDER BY created_at DESC');
 $select_sth->execute();
 ?>
 
