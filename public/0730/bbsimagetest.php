@@ -56,6 +56,7 @@ $select_sth->execute();
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>画像付き掲示板</title>
   <link rel="stylesheet" href="style.css">
   <script>
