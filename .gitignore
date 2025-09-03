@@ -1,0 +1,17 @@
+wp
+7
+
+# public 配下の不要ファイルやディレクトリ
+public/.exiftest.php.swp
+public/0702/
+public/0709/
+public/0716/
+public/0723/
+public/clock.php
+public/datetime.php
+public/hello.html
+public/hoge/
+public/index.html
+public/pdotest.php
+public/phptest.php
+
