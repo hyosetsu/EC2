@@ -29,6 +29,7 @@ sudo systemctl start docker
 sudo systemctl enable docker
 sudo usermod -a -G docker ec2-user
 ```
+
 dockerをインストールしdockerグループに追加
 usermodを反映するために一度ログアウトする
 
@@ -75,6 +76,7 @@ https://github.com/hyosetsu/EC2/blob/main/public/0730/style.css
 docker compose exec mysql mysql example_db
 ```
 でmysqlに接続
+
 example_dbがすでに選ばれているので
 ```
 CREATE TABLE IF NOT EXISTS bbs_entries (
@@ -90,3 +92,5 @@ CREATE TABLE IF NOT EXISTS bbs_entries (
 );
 ```
 でテーブルを作る
+
+これで作成完了
