@@ -1,6 +1,5 @@
 # 実装手順
 ## EC2インスタンスに接続
-<<<<<<< HEAD
 ```
 ssh ec2-user@{IPアドレス} -i C:\Users\ktc\Desktop\{秘密鍵ファイルのパス}
 ```
