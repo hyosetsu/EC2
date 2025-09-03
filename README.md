@@ -1,5 +1,6 @@
 # 実装手順
 ## EC2インスタンスに接続
+<<<<<<< HEAD
 ```
 ssh ec2-user@{IPアドレス} -i C:\Users\ktc\Desktop\{秘密鍵ファイルのパス}
 ```
@@ -51,11 +52,42 @@ mkdir public/0730
 ```
 
 ### 設定ファイルを作る
-- compose.ymlはhttps://github.com/hyosetsu/EC2/blob/main/compose.ymlから
-- Dockerfileはhttps://github.com/hyosetsu/EC2/blob/main/Dockerfileから
-- nginx/conf.d/default.confはhttps://github.com/hyosetsu/EC2/blob/main/nginx/conf.d/default.confから
+- compose.ymlはhttps://github.com/hyosetsu/EC2/blob/main/compose.yml から
+- Dockerfileはhttps://github.com/hyosetsu/EC2/blob/main/Dockerfile から
+- nginx/conf.d/default.confはhttps://github.com/hyosetsu/EC2/blob/main/nginx/conf.d/default.conf から
+
+### ファイルを作る
 ```
+vim public/0730/bbsimagetest.php
+```
+でファイルを編集する
+https://github.com/hyosetsu/EC2/blob/main/public/0730/bbsimagetest.php
+を書く
 
 ```
+vim public/0730/style.css
+```
+でcssファイルを編集する
+https://github.com/hyosetsu/EC2/blob/main/public/0730/style.css
+を書く
 
-- 
+### データベースを作る
+```
+docker compose exec mysql mysql example_db
+```
+でmysqlに接続
+example_dbがすでに選ばれているので
+```
+CREATE TABLE IF NOT EXISTS bbs_entries (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  body TEXT NOT NULL,
+  image_filename VARCHAR(255) DEFAULT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  CREATE TABLE bbs_entries (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  body TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+でテーブルを作る
