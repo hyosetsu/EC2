@@ -1,82 +1,102 @@
-document.addEventListener('DOMContentLoaded', function () {
-  const form = document.querySelector('form');
-  const fileInput = document.getElementById('imageInput');
-  const previewCanvas = document.getElementById('previewCanvas');
-  const ctxPreview = previewCanvas.getContext('2d');
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector("form");
+  const imageInput = document.getElementById("imageInput");
+  const previewArea = document.getElementById("imagePreviewArea"); // プレビュー表示エリア
+  const previewCanvas = document.getElementById("imagePreviewCanvas"); // プレビューcanvas
+  const previewContext = previewCanvas.getContext("2d");
+  const hiddenCanvas = document.getElementById("imageCanvas"); // 縮小処理用canvas
+  const imageBase64Input = document.getElementById("imageBase64Input"); // hidden input
 
   // --- プレビュー処理 ---
-  fileInput.addEventListener('change', function () {
-    if (fileInput.files.length === 0) {
-      ctxPreview.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-      return;
-    }
+  imageInput.addEventListener("change", () => {
+    previewArea.style.display = "none"; // いったん非表示
 
-    const file = fileInput.files[0];
-    if (!file.type.startsWith('image/')) return;
+    if (imageInput.files.length < 1) return;
+
+    const file = imageInput.files[0];
+    if (!file.type.startsWith("image/")) return;
 
     const reader = new FileReader();
-    reader.onload = function (event) {
-      const img = new Image();
-      img.onload = function () {
-        const maxWidth = 400, maxHeight = 300;
-        let width = img.width, height = img.height;
-        if (width > maxWidth) {
-          height *= maxWidth / width;
-          width = maxWidth;
+    const img = new Image();
+
+    reader.onload = () => {
+      img.onload = () => {
+        // プレビューは最大 400x300 に縮小
+        const maxPreviewWidth = 400;
+        const maxPreviewHeight = 300;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxPreviewWidth) {
+          height *= maxPreviewWidth / width;
+          width = maxPreviewWidth;
         }
-        if (height > maxHeight) {
-          width *= maxHeight / height;
-          height = maxHeight;
+        if (height > maxPreviewHeight) {
+          width *= maxPreviewHeight / height;
+          height = maxPreviewHeight;
         }
+
+        // canvasサイズを設定して描画
         previewCanvas.width = width;
         previewCanvas.height = height;
-        ctxPreview.clearRect(0, 0, width, height);
-        ctxPreview.drawImage(img, 0, 0, width, height);
+        previewContext.clearRect(0, 0, width, height);
+        previewContext.drawImage(img, 0, 0, width, height);
+
+        // 表示
+        previewArea.style.display = "";
       };
-      img.src = event.target.result;
+      img.src = reader.result;
     };
+
     reader.readAsDataURL(file);
   });
 
   // --- 送信時の縮小処理 ---
-  form.addEventListener('submit', function (e) {
-    if (fileInput.files.length === 0) return;
-    const file = fileInput.files[0];
-    if (!file.type.startsWith('image/')) return;
+  form.addEventListener("submit", (e) => {
+    if (imageInput.files.length < 1) return; // 画像なしなら何もしない
 
     e.preventDefault();
+    const file = imageInput.files[0];
+    if (!file.type.startsWith("image/")) {
+      form.submit();
+      return;
+    }
+
     const reader = new FileReader();
-    reader.onload = function (event) {
-      const img = new Image();
-      img.onload = function () {
-        const canvas = document.createElement('canvas');
-        const maxSize = 1920;
-        let width = img.width, height = img.height;
+    const img = new Image();
+
+    reader.onload = () => {
+      img.onload = () => {
+        const maxLength = 2000; // 縦横2000pxまでに縮小
+        let width = img.width;
+        let height = img.height;
 
         if (width > height) {
-          if (width > maxSize) { height *= maxSize / width; width = maxSize; }
+          if (width > maxLength) {
+            height *= maxLength / width;
+            width = maxLength;
+          }
         } else {
-          if (height > maxSize) { width *= maxSize / height; height = maxSize; }
+          if (height > maxLength) {
+            width *= maxLength / height;
+            height = maxLength;
+          }
         }
 
-        canvas.width = width; canvas.height = height;
-        const ctx = canvas.getContext('2d');
+        hiddenCanvas.width = width;
+        hiddenCanvas.height = height;
+        const ctx = hiddenCanvas.getContext("2d");
         ctx.drawImage(img, 0, 0, width, height);
 
-        canvas.toBlob(function (blob) {
-          if (blob.size > 5 * 1024 * 1024) {
-            alert("5MB以下に縮小できませんでした。");
-            return;
-          }
-          const newFile = new File([blob], file.name, { type: file.type });
-          const dataTransfer = new DataTransfer();
-          dataTransfer.items.add(newFile);
-          fileInput.files = dataTransfer.files;
-          form.submit();
-        }, file.type, 0.85);
+        // JPEGに変換して hidden input にセット
+        imageBase64Input.value = hiddenCanvas.toDataURL("image/jpeg", 0.9);
+
+        form.submit();
       };
-      img.src = event.target.result;
+      img.src = reader.result;
     };
+
     reader.readAsDataURL(file);
   });
 });
+
